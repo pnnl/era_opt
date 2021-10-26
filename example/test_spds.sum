@@ -1,0 +1,8 @@
+ Load balance information:
+ number of tasks, izc                       = 100
+ number of subtasks iy_delta_sum            = 80461
+ number of combinations examined            = 485938
+ total combinations in TCA                  = 1388
+ max subtasks/node(max_iy_delta_sum         = 3804
+ max combos examined/node(max_ix_delta_sum) = 20900
+ max combos in TCA/node (max_in_tca)        = 72

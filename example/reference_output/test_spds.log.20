@@ -1,0 +1,12 @@
+state->usage = 775904
+nx = 1, ny = 2, nz = 1
+iz = 20 completed, % done =  20.0
+iz = 44 completed, % done =  44.0
+iz = 68 completed, % done =  68.0
+iz = 92 completed, % done =  92.0
+100% complete
+iy_delta_sum = 3539
+ix_delta_sum = 20404
+num in tca   = 58
+max_iy_delta = 1016
+max_ix_delta = 9409

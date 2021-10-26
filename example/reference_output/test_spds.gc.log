@@ -1,0 +1,19 @@
+state->usage = 775904
+nx = 1, ny = 2, nz = 1
+izc = 100
+iyc = 10200
+num y_dom bins = 2048
+ytop (y_dom_vb_max) = 8.347342e+01, ybot (y_dom_vb_min) = 1.781417e-01
+y_dom_ub_min = 1.820424e-01
+y_dom_ub_max = 4.081500e+01
+average_combos_per_y_dom_bin = 4.980469e+00
+max_combos_per_y_dom_bin     = 8
+sd of combos_per_y_dom_bin   = 2.043562e+00
+ixc = 100
+num x_dom bins = 16
+xtop (x_dom_ub_max) = -1.256597e-01, xbot (x_dom_ub_min) = -1.256597e+01
+x_dom_vb_min = 1.662752e-02
+x_dom_vb_max = 1.662752e+00
+average_combos_per_x_dom_bin = 6.250000e+00
+max_combos_per_x_dom_bin     = 7
+sd of combos_per_x_dom_bin   = 5.986095e-01

@@ -1,0 +1,3 @@
+mpiicc -c -g -O2 -w3    era_opt.c
+make: mpiicc: Command not found
+make: *** [era_opt.o] Error 127

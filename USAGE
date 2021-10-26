@@ -1,0 +1,263 @@
+Once you have built the executables as defined in the 
+INSTALL file (in this directory), using the era_opt code 
+to produce a set of lists of power combinations of SPD's 
+that land in a Target Chromaticity Area (TCA) is a 
+two-step process.
+
+We give an overview of the process, and then walk through 
+the example in the example subdirectory.
+
+
+Step 1. Generate the 3 subset combination files with file 
+        endings x.dat, y.dat and z.dat with the gen_combos 
+	routine.
+
+       	gen_combos is a serial executable and should not 
+	be run in parallel. 
+
+	It needs  3 input files. One is specified on the 
+	command line and is the parameter file. 
+	The parameter file is a keyword value pair ascii 
+	(text) file with one keyword value pair per line 
+	that we will describe in more detail below. 
+
+	The other two files are specified in the parameter
+	file. One is the source file of reference SPDs, 
+	ref_data.csv that has CMF columns used to determine
+	u' and v' (CIE 1931 2 degree).
+	It is provided in this distribution.
+
+	The other is a user provided csv file
+	(comma-separated-values) with the test SPDs to be 
+	combined in its columns.
+	The first column of the file should be the 
+	wavelengths of the SPDs. The first wavelength
+	should be 380, and succesive wavelengths each 
+	increase by one up to the last wavelength at 780,
+	a 401 line file.
+	example/test_spds.csv is an example of such file
+	for four test SPD's.
+
+	./gen_combos parameters_file
+
+	is how one executes the gen_combos file. 
+	The parameter file in the example subdirectory 
+	used was f100.gc.in
+	
+	The gen_combos, bf_gen_combos, and era_opt codes
+	all use the same parameter parsing routine so 
+	their input files look very similar.
+	It's convenient to use separate parameter files 
+	for the two runs so as to be able to give the 
+	summary and log files different names so that the 
+	era_opt generated files don't overwrite the 
+	gen_combos generated files.
+	
+
+Step 2. The era_opt program is then run using the same set 
+        of input files that gen_combos needed and the 
+	subset combo output files from gen_combos. 
+	Those susbset files with suffixes ".x.dat" 
+	".y.dat" and ".z.dat" are specified in
+	the parameters file and must be the same in 
+	the parameters file used for the gen_combos 
+	run and the parameters_file for the era_opt run.
+
+	The era_opt program is an MPI program and meant 
+	to be launched with an mpirun/mpiexec command 
+	(whichever your system uses) as follows
+
+	mpirun -n 24 ./era_opt parameters_file
+
+	The above command launches a 24 way parallel 
+	run of era_opt, producing 24 output files with 
+	base file name specified in the COMBOS_OUT_FILE 
+	parameter and suffixed by a .rank with rank in 
+	[0,23]. Each rank is exploring different 
+	combinations of the input SPDs at different 
+	power levels so the output files have 
+	non-overlapping results.
+
+	The -n 24 argument is how we specify the level
+	of parallelism (number of mpi-ranks) to run on
+	our system, yours may be slightly different 
+	depending on your flavor of MPI 
+	(e.g. Intel, OpenMPI, MVAPICH2, etc).
+
+
+        In the example subdirectory we have created 
+	soft links to the executables built one level 
+	up with the make command, and a soft link to 
+        the ref_data.csv file also one level up. 
+	The file with 4 test SPDs
+	to be examined is in example/test_spds.csv
+
+	The gen_combos command
+
+	./gen_combos f100.gc.in
+
+	was the command used to generate the subset 
+	files test_spds.x.dat, test_spds.y.dat, 
+	test_spds.z.dat and
+	the log file test_spds.gc.log file. 
+	(After running the era_opt command below, 
+	these files were moved to the 
+	examples/reference_output subdirectory so as not 
+	to be overwritten by those running the example 
+	from the example subdirectory.
+
+	The era_opt command used was then
+
+	mpirun -n 24 ./era_opt f100.in
+
+	That generated the test_spds.sum
+	the  test_spds.log.0 through test_spds.log.23 
+	log files and test_spds_out.csv.0 through 
+	test_spds_out.csv.23 output files with the 
+	power step levels for the test SPDs,
+	and the (x,y,z) coordinates for the corresponding 
+	stimulus value (TSV) for that combination.
+	These files were also moved to the 
+	example/reference_output subdirectory.
+
+
+The parameter file: We display the f100.gc.in file here 
+for discussion, the f100.in file changes only the names
+of the log and summary files (the gen_combos code doesn't
+ actually produce a summary file).
+
+# FIXED PARAMETERS
+#
+SOURCE_FILE         source_tm30_new_20210623.csv
+U_TARGET            0.2357;
+V_TARGET            0.5112;
+TEST_RAD            0.0005;
+#
+#PER RUN PARAMETERS
+#
+CHANNELS_FILE       test_spds.csv
+NUM_CHANNELS        4
+STEPS_PER_CHANNEL   101
+SUMMARY_FILE        test_spds.gc.sum
+COMBOS_OUT_FILE     test_spds_out.csv
+LOG_FILE            test_spds.gc.log
+X_DOM_FILE          test_spds.x.dat
+Y_DOM_FILE          test_spds.y.dat
+Z_DOM_FILE          test_spds.z.dat
+
+
+The source file line should remain as is and that file 
+needs to be in the directory from which you run the
+gen_combos and era_opt commands (or have a full path 
+prefixed to it).
+
+The U_TARGET and V_TARGET lines specify the (u',v') 
+coordinates for the center of the Target Chromaticity Area
+(TCA) that you want your SPD combinations TSV values to 
+map to. 
+
+The TEST_RAD line is the radius of that TCA.
+The values shown are the default values and the ones 
+used in the reference paper.
+
+The CHANNELS_FILE line specifies the name of the user 
+supplied csv file of test spd's with the first column
+being wavelengths from 380 to 780 inclusive.
+
+The NUM_CHANNELS line specifies the number of test SPD's 
+in the CHANNELS_FILE. That file will have NUM_CHANNELS+1
+columns with the first column being the wavelength 
+numbers from 380 to 780 inclusive.
+
+
+The SUMMARY_FILE line specifies the name of the summary 
+file only produced by the era_opt executable.
+It contains some load balance information used in parts 
+of the reference paper.
+
+The COMBOS_OUT_FILE line specifies the name of the 
+csv file with the power levels for each channel in a 
+combination and the corresponding TSV coordinates, 
+for that combination (one combination per line).
+It too, is only used by the era_opt program.
+
+The LOG_FILE line specifies the log file name for the 
+gen_combos and bf_gen_combos programs and the base of 
+the logfile names for each rank that the era_opt 
+program was run on (they are suffixed by a .number 
+where number is their mpi-rank).
+
+The log files for the gen_combos/bf_gen_combos codes have
+some information about the bounding pyramid 
+(see the reference paper), and the distributon of the 
+test SPDs in terms of their dominant TSV value on the 
+first line. Also in those files is some information 
+about the distribution of their distances from the 
+sides of the bounding pyramid (the bounding planes).
+
+IMPORTANT, the era_opt code requires at least one test 
+SPD TSV to have a dominant TSV coordinate for each of the three (x,y,z) TSV values.
+This distribution of TSV dominant values is given on 
+the first line of the log file from 
+gen_combos/bf_gen_combos in the form of
+
+nx = 1, ny = 2, nz = 1
+
+for the example test_spds.csv. 
+If any of those values is zero meaning that no test SPD 
+had a dominant TSV coordinate for that position
+the gen_combos/bf_gen_combos will not generate any x.dat, 
+y.dat, or z.dat files for the era_opt code to use as input. 
+We may at some later point amend the code to be able to 
+handle those cases.
+
+The log file for era_opt contains some progress 
+lines printed during the execution of the code, and then
+some information about the work performed by that rank.
+
+The X_DOM_FILE, Y_DOM_FILE and Z_DOM_FILE lines provide 
+the names for the three subset combos files that are 
+output by the gen_combos/bf_gen_combos codes and used 
+as inputs by the era_opt code. Therefore they need to 
+be exactly the same in the parameter files used for 
+both codes.
+
+
+Notes:
+	The test_spds.x.dat, test_spds.y.dat and 
+	test_spds.z.dat files that are output by 
+	gen_combos are 	in binary format to save space
+	and improve performance when reading them.
+	The view_coord_file executable will print 
+	out an ascii (human readable) text based csv 
+	file of that information that takes about 1.5 
+	to 2 times as much space. 
+	That output file will have a .ascii suffix 
+	attached to it. The command:
+
+	view_coord_file test_spds.x.dat
+
+	will produce a test_spds.x.dat.ascii for example
+
+	The .ascii versions of the .dat files for the 
+	example have also been moved to the 
+	/example/reference_output subdirectory.
+	
+	The bf_gen_combos executable is used to 
+	generate the combination subsets with out 
+	the Z_max filter on for the channels with a 
+	dominiant TSV z coordinate.
+	Running era_opt with those .dat files
+	and adding a USE_BRUTEFORCE 1 line to 
+	the parameters file will run the 
+	brute-force algorithm instead
+	of the enumeration-reduction-algorithm (era_opt)
+	for finding combinations that land in the TCA.
+	This is to be use for benchmarking runs only, 
+	as for production runs, it takes more time 
+	than era_opt (see the reference paper).
+
+	
+	
+
+

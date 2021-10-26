@@ -1,0 +1,273 @@
+This repository is for the era_opt code, which is software 
+to determine combinations of spectral power distributions
+(SPDs) of electric light sources that land within a target
+chromaticity region in the CIE 1976 (u',v') uniform 
+chromaticity scale diagram.
+
+compendium:
+
+README              This file.
+
+AUTHORS             List of contributors to this software.
+
+LICENSE             License file. Please read before using 
+		    this software.
+
+DISCLAIMER          Legal Disclaimer. Please read before
+		    using this software.
+
+INSTALL             Build instructions
+USAGE               Instructions on using the software.
+
+Makefile            Top level make file for building the 
+		    four executables gen_combos, 
+		    bf_gen_combos, era_opt, and 
+		    view_coord_file
+
+makefile.header     Compiler and flags definitions 
+		    for the Makefile
+
+makefile.body       Body of dependencies and build 
+		    instructions for the Makefile
+
+ref_data.csv        Source file of reference SPDs 
+		    and associated data. 
+
+Source code files (.c and header files .h) one .c and one 
+.h file per routine. One _struct.h file per custom struct used.
+
+add_suffix.c
+add_suffix.h
+alloc0.c
+alloc0.h
+alloc1.c
+alloc1.h
+bf_gen_combos.c
+bf_gen_z_combo.c
+bf_gen_z_combo.h
+bf_gen_z_dom_combos.c
+bf_gen_z_dom_combos.h
+bf_process_combos.c
+bf_process_combos.h
+build_coord_filenames.c
+build_coord_filenames.h
+build_upf_list.c
+build_upf_list.h
+combo_merge.c
+combo_merge.h
+combo_sort.c
+combo_sort.h
+comm_map_struct.h
+count_nws.c
+count_nws.h
+count_nzc.c
+count_nzc.h
+count_ws.c
+count_ws.h
+csv_read.c
+csv_read.h
+dist_data.c
+dist_data.h
+dist_params.c
+dist_params.h
+dvtbnr.c
+dvtbnr.h
+dvtbxr.c
+dvtbxr.h
+echo_channels_subset.c
+echo_channels_subset.h
+ellipse_struct.h
+env.csh
+eprocess_combos.c
+eprocess_combos.h
+era_exit.c
+era_exit.h
+era_mpi_init.c
+era_mpi_init.h
+era_opt.c
+example
+extract_root.c
+extract_root.h
+extract_subset.c
+extract_subset.h
+field_width.c
+field_width.h
+fill_isteps_per_channel.c
+fill_isteps_per_channel.h
+gen_combos.c
+gen_x_combo.c
+gen_x_combo.h
+gen_x_dom_combos.c
+gen_x_dom_combos.h
+gen_y_combo.c
+gen_y_combo.h
+gen_y_dom_combos.c
+gen_y_dom_combos.h
+gen_z_combo.c
+gen_z_combo.h
+gen_z_dom_combos.c
+gen_z_dom_combos.h
+get_ipsteps.c
+get_ipsteps.h
+groups_struct.h
+init_ivtbar.c
+init_ivtbar.h
+init_loop_state.c
+init_loop_state.h
+init_x_dom_combos.c
+init_x_dom_combos.h
+init_y_dom_combos.c
+init_y_dom_combos.h
+init_z_dom_combos.c
+init_z_dom_combos.h
+ivtbar.c
+ivtbar.h
+ivtbxr.c
+ivtbxr.h
+lb_summary.c
+lb_summary.h
+load_params.c
+load_params.h
+loop_state_struct.h
+matrix_transpose.c
+matrix_transpose.h
+mmap_coord_files.c
+mmap_coord_files.h
+mtmp.c
+mtmp.h
+output_combo_tsv.c
+output_combo_tsv.h
+pack_imap.c
+pack_imap.h
+pack_isteps.c
+pack_isteps.h
+plane_eq.c
+plane_eq.h
+pos_char.c
+pos_char.h
+pos_comma.c
+pos_comma.h
+prep.c
+prep.h
+process_combo.c
+process_combo.h
+read_data.c
+read_data.h
+read_params.c
+read_params.h
+record_dbg_steps.c
+record_dbg_steps.h
+record_scales.c
+record_scales.h
+record_steps_per_channel.c
+record_steps_per_channel.h
+record_subset.c
+record_subset.h
+record_vrb.c
+record_vrb.h
+set_refinement_intervals.c
+set_refinement_intervals.h
+set_test_radii_sq.c
+set_test_radii_sq.h
+size_file.c
+size_file.h
+sort_combo_pairs.c
+sort_combo_pairs.h
+sort_combo_pairs_in_place.c
+sort_combo_pairs_in_place.h
+sort_ts_pairs.c
+sort_ts_pairs.h
+sort_ts_pairs_in_place.c
+sort_ts_pairs_in_place.h
+state_struct.h
+system_includes.h
+ts_merge.c
+ts_merge.h
+ts_sort.c
+ts_sort.h
+unique_ratio.c
+unique_ratio.h
+unload_params.c
+unload_params.h
+unpack_imap.c
+unpack_imap.h
+unpack_isteps.c
+unpack_isteps.h
+upcase.c
+upcase.h
+view_coord_file.c
+
+./example:  Subdirectory with sample input file test_spds.csv and soft links to executables built in
+	    parent directory.
+.
+..
+env.csh
+era_opt
+f100.gc.in
+f100.in
+gen_combos
+reference_output
+select.sbatch
+ref_data.csv
+test_spds.csv
+view_coord_file
+
+./example/reference_output: Reference output for the test_spds.csv and f100.gc.in and f100.in files in the example subdirectory.
+.
+..
+test_spds.gc.log
+test_spds.log.0
+test_spds.log.1
+test_spds.log.10
+test_spds.log.11
+test_spds.log.12
+test_spds.log.13
+test_spds.log.14
+test_spds.log.15
+test_spds.log.16
+test_spds.log.17
+test_spds.log.18
+test_spds.log.19
+test_spds.log.2
+test_spds.log.20
+test_spds.log.21
+test_spds.log.22
+test_spds.log.23
+test_spds.log.3
+test_spds.log.4
+test_spds.log.5
+test_spds.log.6
+test_spds.log.7
+test_spds.log.8
+test_spds.log.9
+test_spds.sum
+test_spds.x.dat
+test_spds.x.dat.ascii
+test_spds.y.dat
+test_spds.y.dat.ascii
+test_spds.z.dat
+test_spds.z.dat.ascii
+test_spds_out.csv.0
+test_spds_out.csv.1
+test_spds_out.csv.10
+test_spds_out.csv.11
+test_spds_out.csv.12
+test_spds_out.csv.13
+test_spds_out.csv.14
+test_spds_out.csv.15
+test_spds_out.csv.16
+test_spds_out.csv.17
+test_spds_out.csv.18
+test_spds_out.csv.19
+test_spds_out.csv.2
+test_spds_out.csv.20
+test_spds_out.csv.21
+test_spds_out.csv.22
+test_spds_out.csv.23
+test_spds_out.csv.3
+test_spds_out.csv.4
+test_spds_out.csv.5
+test_spds_out.csv.6
+test_spds_out.csv.7
+test_spds_out.csv.8
+test_spds_out.csv.9

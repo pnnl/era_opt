@@ -1,0 +1,9 @@
+MPICC = mpiicc
+CC    = icc
+AR    = ar
+
+COPT_FLAGS = -g -O2 -w3 
+CFLAGS =  $(COPT_FLAGS) 
+ARFLAGS = crv
+
+LDFLAGS = -g -lm

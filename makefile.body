@@ -1,0 +1,383 @@
+ERA_LIB  = era_lib.a
+
+all:  era_opt gen_combos view_coord_file bf_gen_combos $(LIB) 
+
+TM30_FLAGS = 
+PREP_TM30_INCS = 
+PROCESS_TM30_INCS = 
+ERA_TM30_INCS = 
+ITOBJS     = 
+TOBJS      = 
+OTOBJS     = 
+HOBJS      = 
+BLAS_OBJS  = 
+LAPACK_OBJS = 
+
+INCS = system_includes.h state_struct.h loop_state_struct.h comm_map_struct.h ellipse_struct.h groups_struct.h 
+
+# MPI objects
+MOBJS = era_mpi_init.o era_exit.o dist_params.o dist_data.o ivtbar.o init_ivtbar.o ivtbxr.o dvtbxr.o dvtbnr.o
+
+# Parameter objects
+POBJS = read_params.o count_ws.o count_nws.o upcase.o record_steps_per_channel.o record_scales.o pos_comma.o record_subset.o record_vrb.o record_dbg_steps.o pos_char.o set_test_radii_sq.o load_params.o unload_params.o 
+
+# Allocation objects
+AOBJS = alloc0.o alloc1.o 
+
+# Data Input objects
+ROBJS = read_data.o csv_read.o field_width.o 
+
+# Initialization objects
+IOBJS = build_coord_filenames.o extract_root.o add_suffix.o init_loop_state.o ts_sort.o ts_merge.o sort_ts_pairs.o sort_ts_pairs_in_place.o plane_eq.o fill_isteps_per_channel.o set_refinement_intervals.o build_upf_list.o mmap_coord_files.o size_file.o prep.o matrix_transpose.o extract_subset.o mtmp.o 
+
+# Combination selection objects
+EOBJS = eprocess_combos.o process_combo.o unpack_isteps.o count_nzc.o unique_ratio.o bf_process_combos.o 
+
+# output_routines
+OOBJS = output_combo_tsv.o get_ipsteps.o lb_summary.o 
+
+# Generate combos routines.
+GOBJS = gen_z_dom_combos.o init_z_dom_combos.o pack_imap.o combo_sort.o sort_combo_pairs_in_place.o sort_combo_pairs.o combo_merge.o gen_z_combo.o pack_isteps.o gen_y_dom_combos.o init_y_dom_combos.o gen_y_combo.o gen_x_dom_combos.o init_x_dom_combos.o gen_x_combo.o echo_channels_subset.o bf_gen_z_dom_combos.o bf_gen_z_combo.o
+
+# Auxiliary routines for view_coords
+VOBJS = unpack_imap.o 
+
+$(LIB): $(MOBJS) $(AOBJS) $(POBJS) $(IOBJS) $(ITOBJS) $(ROBJS) $(EOBJS) $(OOBJS) $(VOBJS) $(TOBJS) $(HOBJS) $(COBJS) $(OTOBJS) $(GOBJS) 
+	ar -s $(LIB)
+
+gen_combos: gen_combos.o $(AOBJS) $(POBJS) $(IOBJS) $(ROBJS) $(GOBJS) $(OOBJS) $(BLAS_OBJS) $(LAPACK_OBJS)
+	    $(MPICC) -o gen_combos gen_combos.o $(ERA_LIB) $(LDFLAGS) ${MLIB_LDFLAGS}
+
+
+bf_gen_combos: bf_gen_combos.o $(AOBJS) $(POBJS) $(IOBJS) $(ROBJS) $(GOBJS) $(OOBJS) $(BLAS_OBJS) $(LAPACK_OBJS)
+	    $(MPICC) -o bf_gen_combos bf_gen_combos.o $(ERA_LIB) $(LDFLAGS) ${MLIB_LDFLAGS}
+
+
+#                    mpi    allocate  params   init     read     select   Tm_30    histo    output
+era_opt: era_opt.o $(MOBJS) $(AOBJS) $(POBJS) $(IOBJS) $(ROBJS) $(EOBJS) $(TOBJS) $(HOBJS) $(OOBJS) $(OTOBJS) $(BLAS_OBJS) $(LAPACK_OBJS)
+	 $(MPICC) -o era_opt era_opt.o $(ERA_LIB) $(TM30_FLAGS) $(LDFLAGS) ${MLIB_LDFLAGS}
+
+view_coord_file: view_coord_file.o size_file.o unpack_isteps.o unpack_imap.o
+	    $(MPICC) -o view_coord_file view_coord_file.o size_file.o unpack_isteps.o unpack_imap.o $(LDFLAGS)
+
+era_mpi_init.o: era_mpi_init.c era_mpi_init.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) era_mpi_init.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) era_mpi_init.o
+
+era_exit.o: era_exit.c era_exit.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) era_exit.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) era_exit.o
+
+dist_params.o: dist_params.c dist_params.h $(INCS) era_exit.h unload_params.h
+	       $(MPICC) -c $(COPT_FLAGS) dist_params.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) dist_params.o
+	       
+dist_data.o: dist_data.c dist_data.h $(INCS) era_exit.h
+	     $(MPICC) -c $(COPT_FLAGS) dist_data.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) dist_data.o
+
+init_ivtbar.o: init_ivtbar.c init_ivtbar.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) init_ivtbar.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) init_ivtbar.o
+
+ivtbar.o: ivtbar.c ivtbar.h $(INCS)
+	  $(MPICC) -c $(COPT_FLAGS) ivtbar.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) ivtbar.o
+
+ivtbxr.o: ivtbxr.c ivtbxr.h $(INCS)
+	  $(MPICC) -c $(COPT_FLAGS) ivtbxr.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) ivtbxr.o
+
+dvtbxr.o: dvtbxr.c dvtbxr.h $(INCS)
+	  $(MPICC) -c $(COPT_FLAGS) dvtbxr.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) dvtbxr.o
+
+dvtbnr.o: dvtbxr.c dvtbnr.h $(INCS)
+	  $(MPICC) -c $(COPT_FLAGS) dvtbnr.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) dvtbnr.o
+
+alloc0.o: alloc0.c alloc0.h $(INCS)
+	  $(MPICC) -c $(COPT_FLAGS) alloc0.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) alloc0.o
+
+alloc1.o: alloc1.c alloc1.h $(INCS) 
+	  $(MPICC) -c $(COPT_FLAGS) alloc1.c
+	  $(AR) $(ARFLAGS) $(ERA_LIB) alloc1.o
+
+read_params.o: read_params.c read_params.h $(INCS) count_ws.h count_nws.h upcase.h record_steps_per_channel.h record_scales.h set_test_radii_sq.h record_vrb.h record_subset.h record_dbg_steps.h
+	       $(MPICC) -c $(COPT_FLAGS) read_params.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) read_params.o
+
+count_ws.o: count_ws.c count_ws.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) count_ws.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) count_ws.o
+
+count_nws.o: count_nws.c count_nws.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) count_nws.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) count_nws.o
+
+upcase.o: upcase.c upcase.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) upcase.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) upcase.o
+
+record_steps_per_channel.o: record_steps_per_channel.c record_steps_per_channel.h pos_comma.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) record_steps_per_channel.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) record_steps_per_channel.o
+
+record_scales.o: record_scales.c record_scales.h $(INCS) pos_comma.h
+	   $(MPICC) -c $(COPT_FLAGS) record_scales.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) record_scales.o
+
+pos_comma.o: pos_comma.c pos_comma.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) pos_comma.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) pos_comma.o
+
+record_vrb.o: record_vrb.c record_vrb.h $(INCS) pos_char.h
+	   $(MPICC) -c $(COPT_FLAGS) record_vrb.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) record_vrb.o
+
+record_subset.o: record_subset.c record_subset.h $(INCS) pos_comma.h
+	   $(MPICC) -c $(COPT_FLAGS) record_subset.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) record_subset.o
+
+record_dbg_steps.o: record_dbg_steps.c record_dbg_steps.h $(INCS) pos_comma.h
+	   $(MPICC) -c $(COPT_FLAGS) record_dbg_steps.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) record_dbg_steps.o
+
+pos_char.o: pos_char.c pos_char.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) pos_char.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) pos_char.o
+
+set_test_radii_sq.o: set_test_radii_sq.c set_test_radii_sq.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) set_test_radii_sq.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) set_test_radii_sq.o
+
+load_params.o: load_params.c load_params.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) load_params.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) load_params.o
+
+unload_params.o: unload_params.c unload_params.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) unload_params.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) unload_params.o
+
+read_data.o: read_data.c read_data.h $(INCS) csv_read.h 
+	     $(MPICC) -c $(COPT_FLAGS) read_data.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) read_data.o
+
+csv_read.o: csv_read.c csv_read.h $(INCS) field_width.h
+	    $(MPICC) -c $(COPT_FLAGS) csv_read.c
+	    $(AR) $(ARFLAGS) $(ERA_LIB) csv_read.o
+
+field_width.o: field_width.c field_width.h $(INCS) 
+	       $(MPICC) -c $(COPT_FLAGS) field_width.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) field_width.o
+
+build_coord_filenames.o: build_coord_filenames.c build_coord_filenames.h $(INC) extract_root.h add_suffix.h
+	   $(MPICC) -c $(COPT_FLAGS) build_coord_filenames.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) build_coord_filenames.o
+
+extract_root.o: extract_root.c extract_root.h $(INCS)
+		$(MPICC) -c $(COPT_FLAGS) extract_root.c
+		$(AR) $(ARFLAGS) $(ERA_LIB) extract_root.o
+
+add_suffix.o: add_suffix.c add_suffix.h $(INCS)
+	      $(MPICC) -c $(COPT_FLAGS) add_suffix.c
+	      $(AR) $(ARFLAGS) $(ERA_LIB) add_suffix.o
+
+prep.o: prep.c prep.h $(INCS) matrix_transpose.h extract_subset.h mtmp.h $(PREP_TM30_INCS)
+	$(MPICC) -c $(COPT_FLAGS) $(TM30_FLAGS) prep.c
+	$(AR) $(ARFLAGS) $(ERA_LIB) prep.o
+       
+matrix_transpose.o: matrix_transpose.c matrix_transpose.h $(INCS)
+		   $(MPICC) -c $(COPT_FLAGS) matrix_transpose.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) matrix_transpose.o
+
+extract_subset.o: extract_subset.c extract_subset.h $(INCS)
+	   $(MPICC) -c $(COPT_FLAGS) extract_subset.c
+	   $(AR) $(ARFLAGS) $(ERA_LIB) extract_subset.o
+
+init_loop_state.o: init_loop_state.c init_loop_state.h $(INCS) ts_sort.h fill_isteps_per_channel.h set_refinement_intervals.h plane_eq.h build_upf_list.h
+	     $(MPICC) -c $(COPT_FLAGS) init_loop_state.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) init_loop_state.o
+
+ts_sort.o: ts_sort.c ts_sort.h $(INCS) ts_merge.h sort_ts_pairs.h sort_ts_pairs_in_place.h
+	     $(MPICC) -c $(COPT_FLAGS) ts_sort.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) ts_sort.o
+
+ts_merge.o: ts_merge.c ts_merge.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) ts_merge.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) ts_merge.o
+
+sort_ts_pairs.o: sort_ts_pairs.c sort_ts_pairs.h $(INCS)
+		 $(MPICC) -c $(COPT_FLAGS) sort_ts_pairs.c
+		 $(AR) $(ARFLAGS) $(ERA_LIB) sort_ts_pairs.o
+
+sort_ts_pairs_in_place.o: sort_ts_pairs_in_place.c sort_ts_pairs_in_place.h $(INCS)
+		 $(MPICC) -c $(COPT_FLAGS) sort_ts_pairs_in_place.c
+		 $(AR) $(ARFLAGS) $(ERA_LIB) sort_ts_pairs_in_place.o
+
+fill_isteps_per_channel.o: fill_isteps_per_channel.c fill_isteps_per_channel.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) fill_isteps_per_channel.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) fill_isteps_per_channel.o
+
+set_refinement_intervals.o: set_refinement_intervals.c set_refinement_intervals.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) set_refinement_intervals.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) set_refinement_intervals.o
+
+plane_eq.o: plane_eq.c plane_eq.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) plane_eq.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) plane_eq.o
+
+build_upf_list.o: build_upf_list.c build_upf_list.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) build_upf_list.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) build_upf_list.o
+
+mmap_coord_files.o: mmap_coord_files.c mmap_coord_files.h $(INCS) size_file.h
+		    $(MPICC) -c $(COPT_FLAGS) mmap_coord_files.c
+		    $(AR) $(ARFLAGS) $(ERA_LIB) mmap_coord_files.o
+
+size_file.o: size_file.c size_file.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) size_file.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) size_file.o
+
+eprocess_combos.o: eprocess_combos.c eprocess_combos.h $(INCS) unpack_isteps.h count_nzc.h process_combo.h
+		   $(MPICC) -c $(COPT_FLAGS) eprocess_combos.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) eprocess_combos.o
+
+process_combo.o: process_combo.c process_combo.h $(INCS) unique_ratio.h get_ipsteps.h output_combo_tsv.h $(PROCESS_TM30_INCS)
+		   $(MPICC) -c $(COPT_FLAGS) $(TM30_FLAGS) process_combo.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) process_combo.o
+
+unpack_isteps.o: unpack_isteps.c unpack_isteps.h $(INCS)
+		 $(MPICC) -c $(COPT_FLAGS) unpack_isteps.c
+		 $(AR) $(ARFLAGS) $(ERA_LIB) unpack_isteps.o
+
+get_steps.o: get_steps.c get_steps.h $(INCS)
+		  $(MPICC) -c $(COPT_FLAGS) get_steps.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) get_steps.o
+	     	     		 
+get_ipsteps.o: get_ipsteps.c get_ipsteps.h $(INCS)
+		  $(MPICC) -c $(COPT_FLAGS) get_ipsteps.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) get_ipsteps.o
+	     	     		 
+count_nzc.o: count_nzc.c count_nzc.h $(INCS)
+		  $(MPICC) -c $(COPT_FLAGS) count_nzc.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) count_nzc.o
+
+unique_ratio.o: unique_ratio.c unique_ratio.h $(INCS)
+		  $(MPICC) -c $(COPT_FLAGS) unique_ratio.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) unique_ratio.o
+
+bf_process_combos.o: bf_process_combos.c bf_process_combos.h $(INCS) unpack_isteps.h count_nzc.h process_combo.h
+		   $(MPICC) -c $(COPT_FLAGS) bf_process_combos.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) bf_process_combos.o
+
+mvp.o:   mvp.c mvp.h $(INCS)
+	$(MPICC) -c $(COPT_FLAGS) mvp.c
+	$(AR) $(ARFLAGS) $(ERA_LIB) mvp.o
+
+mtvp.o:  mtvp.c mtvp.h $(INCS)
+	$(MPICC) -c $(COPT_FLAGS) mtvp.c
+	$(AR) $(ARFLAGS) $(ERA_LIB) mtvp.o
+
+mtmp.o:  mtmp.c mtmp.h $(INCS)
+	$(MPICC) -c $(COPT_FLAGS) mtmp.c
+	$(AR) $(ARFLAGS) $(ERA_LIB) mtmp.o
+
+output_combo_tsv.o: output_combo_tsv.c output_combo_tsv.h $(INCS)
+		  $(MPICC) -c $(COPT_FLAGS) output_combo_tsv.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) output_combo_tsv.o
+
+gen_combos.o: gen_combos.c $(INCS) alloc0.h read_params.h alloc1.h fill_isteps_per_channel.h read_data.h build_coord_filenames.h prep.h init_loop_state.h gen_z_dom_combos.h gen_y_dom_combos.h gen_x_dom_combos.h echo_channels_subset.h
+	   $(MPICC) -c $(COPT_FLAGS) gen_combos.c
+
+bf_gen_combos.o: bf_gen_combos.c $(INCS) alloc0.h read_params.h alloc1.h fill_isteps_per_channel.h read_data.h build_coord_filenames.h prep.h init_loop_state.h bf_gen_z_dom_combos.h gen_y_dom_combos.h gen_x_dom_combos.h echo_channels_subset.h
+	   $(MPICC) -c $(COPT_FLAGS) bf_gen_combos.c
+
+gen_z_dom_combos.o: gen_z_dom_combos.c gen_z_dom_combos.h $(INCS) init_z_dom_combos.h pack_imap.h combo_sort.h gen_z_combo.h pack_isteps.h
+		   $(MPICC) -c $(COPT_FLAGS) gen_z_dom_combos.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) gen_z_dom_combos.o
+
+bf_gen_z_dom_combos.o: bf_gen_z_dom_combos.c bf_gen_z_dom_combos.h $(INCS) init_z_dom_combos.h pack_imap.h combo_sort.h bf_gen_z_combo.h pack_isteps.h
+		   $(MPICC) -c $(COPT_FLAGS) bf_gen_z_dom_combos.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) bf_gen_z_dom_combos.o
+
+init_z_dom_combos.o: init_z_dom_combos.c init_z_dom_combos.h $(INCS) pack_imap.h
+		    $(MPICC) -c $(COPT_FLAGS) init_z_dom_combos.c
+		    $(AR) $(ARFLAGS) $(ERA_LIB) init_z_dom_combos.o
+		    
+pack_imap.o: pack_imap.c pack_imap.h $(INCS)
+	     $(MPICC) -c $(COPT_FLAGS) pack_imap.c
+	     $(AR) $(ARFLAGS) $(ERA_LIB) pack_imap.o
+
+combo_sort.o: combo_sort.c combo_sort.h $(INCS) sort_combo_pairs_in_place.h sort_combo_pairs.h combo_merge.h
+	      $(MPICC) -c $(COPT_FLAGS) combo_sort.c
+	      $(AR) $(ARFLAGS) $(ERA_LIB) combo_sort.o
+
+sort_combo_pairs_in_place.o: sort_combo_pairs_in_place.c sort_combo_pairs_in_place.h $(INCS)
+			     $(MPICC) -c $(COPT_FLAGS) sort_combo_pairs_in_place.c
+			     $(AR) $(ARFLAGS) $(ERA_LIB) sort_combo_pairs_in_place.o
+
+sort_combo_pairs.o: sort_combo_pairs.c sort_combo_pairs.h $(INCS)
+		    $(MPICC) -c $(COPT_FLAGS) sort_combo_pairs.c
+		    $(AR) $(ARFLAGS) $(ERA_LIB) sort_combo_pairs.o
+
+combo_merge.o: combo_merge.c combo_merge.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) combo_merge.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) combo_merge.o
+
+gen_z_combo.o: gen_z_combo.c gen_z_combo.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) gen_z_combo.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) gen_z_combo.o
+
+bf_gen_z_combo.o: bf_gen_z_combo.c bf_gen_z_combo.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) bf_gen_z_combo.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) bf_gen_z_combo.o
+
+pack_isteps.o: pack_isteps.c pack_isteps.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) pack_isteps.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) pack_isteps.o
+
+gen_y_dom_combos.o: gen_y_dom_combos.c gen_y_dom_combos.h $(INCS) init_y_dom_combos.h pack_imap.h combo_sort.h gen_y_combo.h pack_isteps.h
+		    $(MPICC) -c $(COPT_FLAGS) gen_y_dom_combos.c
+		    $(AR) $(ARFLAGS) $(ERA_LIB) gen_y_dom_combos.o
+
+init_y_dom_combos.o: init_y_dom_combos.c init_y_dom_combos.h $(INCS) pack_imap.h
+		     $(MPICC) -c $(COPT_FLAGS) init_y_dom_combos.c
+		     $(AR) $(ARFLAGS) $(ERA_LIB) init_y_dom_combos.o
+
+gen_y_combo.o: gen_y_combo.c gen_y_combo.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) gen_y_combo.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) gen_y_combo.o
+
+gen_x_dom_combos.o: gen_x_dom_combos.c gen_x_dom_combos.h $(INCS) init_x_dom_combos.h pack_imap.h combo_sort.h gen_x_combo.h pack_isteps.h
+		  $(MPICC) -c $(COPT_FLAGS) gen_x_dom_combos.c
+		  $(AR) $(ARFLAGS) $(ERA_LIB) gen_x_dom_combos.o
+
+init_x_dom_combos.o: init_x_dom_combos.c init_x_dom_combos.h $(INCS) pack_imap.h
+		   $(MPICC) -c $(COPT_FLAGS) init_x_dom_combos.c
+		   $(AR) $(ARFLAGS) $(ERA_LIB) init_x_dom_combos.o
+
+gen_x_combo.o: gen_x_combo.c gen_x_combo.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) gen_x_combo.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) gen_x_combo.o
+
+echo_channels_subset.o: echo_channels_subset.c echo_channels_subset.h $(INCS)
+	       $(MPICC) -c $(COPT_FLAGS) echo_channels_subset.c
+	       $(AR) $(ARFLAGS) $(ERA_LIB) echo_channels_subset.o
+
+lb_summary.o: lb_summary.c lb_summary.h $(INCS) ivtbar.h ivtbxr.h
+		 $(MPICC) -c $(COPT_FLAGS) lb_summary.c
+		 $(AR) $(ARFLAGS) $(ERA_LIB) lb_summary.o
+
+era_opt.o: era_opt.c $(INCS) era_mpi_init.h era_exit.h alloc0.h read_params.h load_params.h dist_params.h alloc1.h init_ivtbar.h fill_isteps_per_channel.h read_data.h dist_data.h prep.h init_loop_state.h mmap_coord_files.h eprocess_combos.h bf_process_combos.h $(ERA_TM30_INCS)
+	       $(MPICC) -c $(CFLAGS) $(TM30_FLAGS) era_opt.c
+
+view_coord_file.o: view_coord_file.c $(INCS) size_file.h unpack_isteps.h unpack_imap.h
+		   $(MPICC) -c $(CFLAGS) view_coord_file.c
+		   
+unpack_imap.o: unpack_imap.c unpack_imap.h $(INCS)
+	       $(MPICC) -c $(CFLAGS) unpack_imap.c
+
+clean:
+	/bin/rm -f era_opt gen_combos bf_gen_combos view_coord_file *.o *.a

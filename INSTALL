@@ -1,0 +1,28 @@
+
+This file contains instructions for how to build the era_opt, gen_combos, bf_gen_combos, and view_coord_file executables.
+
+The code base is in C, with MPI calls so you will need an MPI library (MPI is the Message Passing Interface) and the ability to
+link to it.
+
+First you will want to modify the env.csh script or generate an equivalent script on your system that 
+sets your environment so that an MPI C compiler is in your path and the libraries and mpi libraries that you need to link
+an MPI program to are in a directory in your LD_LIBRARY_PATH. 
+The env.csh included here uses module to load the
+intel compiler and intel mpi libraries on our cluster system to accomplish those tasks.
+
+Next you will want to modify the makefile.header file to set the name of your MPI compiler in the MPICC variable and set any
+compiler flags in the CFLAGS variable and any flags you need to link  in the LD_FLAGS line. There is no -lmpi in the 
+LDFLAGS in the makefile.header included as that is provided by our MPICC command when building, you may need add that or other
+libraries depending on your MPI installation.
+
+ The code builds a shared library of the routines used by the four executables and they each link to it.
+
+After setenv env.csh and makefile.header for your system,
+
+   source env.csh    (or execute your equivalent environment setting script)
+
+then
+	
+   make
+
+should build the executables.

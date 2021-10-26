@@ -1,0 +1,18 @@
+# FIXED PARAMETERS
+#
+SOURCE_FILE         ref_data.csv
+U_TARGET            0.2357;
+V_TARGET            0.5112;
+TEST_RAD            0.0005;
+#
+#PER RUN PARAMETERS
+#
+CHANNELS_FILE       test_spds.csv
+NUM_CHANNELS        4
+STEPS_PER_CHANNEL   101
+SUMMARY_FILE        test_spds.sum
+COMBOS_OUT_FILE     test_spds_out.csv
+LOG_FILE            test_spds.log
+X_DOM_FILE          test_spds.x.dat
+Y_DOM_FILE          test_spds.y.dat
+Z_DOM_FILE          test_spds.z.dat
